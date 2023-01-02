@@ -8,9 +8,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install OpenSSH Server
-      run: sudo apt-get update && sudo apt-get install -y openssh-server
-    - name: Add authorized key
-      run: echo "${{ secrets.AUTHORIZED_KEY }}" >> ~/.ssh/authorized_keys
+    - name: Install OpenSSH Server and tmate
+      run: sudo apt-get update && sudo apt-get install -y openssh-server tmate
     - name: Start SSH server
       run: sudo systemctl start ssh
+    - name: Print connection information
+      id: ssh_credentials
+    - name: Get IP address
+      run: ip a | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
+      id: ssh_ip
+    - name: Start tmate session
+      run: tmate -S /tmp/tmate.sock new-session -d "ssh ubuntu@${{ steps.ssh_ip.output }}"
+      env:
+        SSH_ASKPASS: 'echo "{{steps.ssh_credentials.output}}" | grep "Password:" | awk "{print \$2}"'
+    - name: Connect to tmate session
+      run: tmate -S /tmp/tmate.sock attach
