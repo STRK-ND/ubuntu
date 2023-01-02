@@ -1,0 +1,15 @@
+name: Add SSH key
+
+on: [push]
+
+jobs:
+  add-ssh-key:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Add SSH key
+        uses: shahidhk/ssh-keys@v1
+        with:
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_known_hosts: github.com
