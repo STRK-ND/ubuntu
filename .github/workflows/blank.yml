@@ -1,0 +1,18 @@
+name: Set up SSH Server
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install OpenSSH Server
+      run: sudo apt-get update && sudo apt-get install -y openssh-server
+    - name: Generate SSH key pair
+      run: ssh-keygen -t rsa -b 4096 -f id_rsa -q -N ""
+    - name: Copy public key to authorized keys
+      run: cat id_rsa.pub >> ~/.ssh/authorized_keys
+    - name: Start SSH server
+      run: sudo systemctl start ssh
