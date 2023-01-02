@@ -1,25 +1,20 @@
-name: Set up SSH Server
-
-on: [push]
+name: Ubuntu_Server
+on: 
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
+    - uses: fastai/workflows/ssh@master
+      with:
+        ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        key_file: id_rsa
     - uses: actions/checkout@v2
-    - name: Install OpenSSH Server and tmate
-      run: sudo apt-get update && sudo apt-get install -y openssh-server tmate
-    - name: Start SSH server
-      run: sudo systemctl start ssh
-    - name: Print connection information
-      id: ssh_credentials
-    - name: Get IP address
-      run: ip a | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
-      id: ssh_ip
-    - name: Start tmate session
-      run: tmate -S /tmp/tmate.sock new-session -d "ssh ubuntu@${{ steps.ssh_ip.output }}"
-      env:
-        SSH_ASKPASS: 'echo "{{steps.ssh_credentials.output}}" | grep "Password:" | awk "{print \$2}"'
-    - name: Connect to tmate session
-      run: tmate -S /tmp/tmate.sock attach
+    - run: source ubuntu.sh
+    - name: Setup tmate session
+      timeout-minutes: 1200
+      uses: mxschmitt/action-tmate@master
