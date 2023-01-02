@@ -8,7 +8,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.2.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Add SSH key
+        uses: shahidhk/ssh-keys@v1
         with:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_known_hosts: github.com
+      - name: Test SSH connection
+        run: ssh -T git@github.com
